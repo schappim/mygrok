@@ -366,6 +366,13 @@ func setupTLS(reg *registry, dns dnsProvider) (*tls.Config, error) {
 		CA:     ca,
 		Email:  *certEmail,
 		Agreed: true,
+		// HTTP-01 is switched off because we cannot solve it: our :80
+		// listener does its own Host-header routing and never hands
+		// /.well-known/acme-challenge to certmagic. Leaving it enabled
+		// would just burn an attempt (and a failed-validation against the
+		// rate limit) before falling through to TLS-ALPN-01, which does
+		// work — it rides the :443 handshake we already own.
+		DisableHTTPChallenge: true,
 	})
 	// With a DNS provider we prepend a DNS-01 issuer, the only way to get a
 	// wildcard. One *.<publicHost> cert then covers every tunnel, so new

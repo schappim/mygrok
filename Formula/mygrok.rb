@@ -11,8 +11,8 @@
 class Mygrok < Formula
   desc "Self-hosted tunnel client: forward a local port to a public HTTPS URL"
   homepage "https://github.com/schappim/mygrok"
-  url "https://github.com/schappim/mygrok/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  url "https://github.com/schappim/mygrok/archive/refs/tags/v1.0.1.tar.gz"
+  sha256 "53dbebd7cf7af8be96d855b9a73feab1f488bed575ad0155d034c19c055368fd"
   license "MIT"
   head "https://github.com/schappim/mygrok.git", branch: "main"
 

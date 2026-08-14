@@ -190,8 +190,10 @@ app.example.com.  A      203.0.113.10
 
 The first visit to `https://app.example.com` triggers on-demand certificate
 issuance via certmagic — Let's Encrypt validates over TLS-ALPN-01, which
-piggybacks on the existing `:443` listener, or HTTP-01 over `:80`. Later
-visits use the cached certificate, renewed like any other.
+rides the existing `:443` handshake. (HTTP-01 is disabled: the `:80`
+listener does its own Host-header routing and never serves
+`/.well-known/acme-challenge`, so an HTTP-01 attempt could only fail.)
+Later visits use the cached certificate, renewed like any other.
 
 ### How issuance is gated
 
@@ -215,9 +217,9 @@ mygrok http 3000 --subdomain=jarvis --hostname=app.example.com,api.example.com
 
 ### Caveats
 
-- DNS must resolve to the server *before* the first HTTPS request — both
-  challenge types require Let's Encrypt to reach you at that name. Until
-  then, requests 502.
+- DNS must resolve to the server *before* the first HTTPS request —
+  TLS-ALPN-01 requires Let's Encrypt to reach you at that name on `:443`.
+  Until then, requests 502.
 - Hostnames under your own `publicHost` are rejected; those belong to
   `--subdomain`.
 - Custom hostnames don't combine with the [passkey gate](access-control.md#passkey-lockdown)
