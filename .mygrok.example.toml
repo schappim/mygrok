@@ -1,0 +1,29 @@
+# mygrok per-project config — copy to .mygrok.toml in your project root.
+#
+# `mygrok http` and `mygrok service install` find this file by:
+#   1. --config=<path> flag
+#   2. .mygrok.toml (then .mygrok) in the current dir
+#   3. walking up to each parent dir
+#   4. ~/.mygrok/config.toml (global fallback)
+#
+# Precedence per setting: CLI flag > env var > this file > built-in default.
+# All fields are optional — set only what you want pinned.
+
+# Public subdomain. The URL becomes https://<subdomain>.<your-domain>
+subdomain = "myapp"
+
+# Local port to forward.
+port = 3000
+
+# Local host to forward to. Defaults to 127.0.0.1.
+# Use 0.0.0.0 if forwarding from a different box than the local app.
+# host = "127.0.0.1"
+
+# Tunnel server (host:port). Binaries downloaded from your own mygrokd
+# already have this stamped in, so you usually only need it here if you
+# installed via Homebrew or `go install`.
+# server = "tunnel.example.com:7000"
+
+# Auth token. Prefer keeping this OUT of repo configs — let it come from
+# MYGROK_AUTHTOKEN, ~/.mygrok/authtoken, or ~/.mygrok/config.toml.
+# auth = "..."

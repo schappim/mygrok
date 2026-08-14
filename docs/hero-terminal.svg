@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="785" height="424" viewBox="0 0 785 424" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="14">
+<rect width="785" height="424" rx="10" fill="#0d1119"/>
+<path d="M10 0h765a10 10 0 0 1 10 10v26H0V10A10 10 0 0 1 10 0z" fill="#11151f"/>
+<line x1="0" y1="36" x2="785" y2="36" stroke="#242c3d"/>
+<circle cx="22" cy="18" r="5" fill="#ff8a8a" opacity="0.75"/>
+<circle cx="40" cy="18" r="5" fill="#ffb86b" opacity="0.75"/>
+<circle cx="58" cy="18" r="5" fill="#b8f068" opacity="0.75"/>
+<text x="392.5" y="23" text-anchor="middle" fill="#5b6478" font-size="12">mygrok http 3000 --subdomain=jarvis</text>
+<text x="24" y="52" xml:space="preserve"><tspan fill="#b8f068" font-weight="bold">$ </tspan><tspan fill="#e7eaf2" font-weight="bold">mygrok</tspan><tspan fill="#e7eaf2"> </tspan><tspan fill="#e7eaf2">http</tspan><tspan fill="#e7eaf2"> </tspan><tspan fill="#e7eaf2">3000</tspan><tspan fill="#e7eaf2"> </tspan><tspan fill="#8a93a6">--subdomain=jarvis</tspan></text>
+<text x="24" y="96" xml:space="preserve"><tspan fill="#e7eaf2" font-weight="bold">  mygrok tunnel active</tspan></text>
+<text x="24" y="140" xml:space="preserve"><tspan fill="#8a93a6">  Forwarding   https://jarvis.example.com               -&gt; 127.0.0.1:3000</tspan></text>
+<text x="24" y="162" xml:space="preserve"><tspan fill="#8a93a6">               http://jarvis.example.com                -&gt; 127.0.0.1:3000</tspan></text>
+<text x="24" y="206" xml:space="preserve"><tspan fill="#e7eaf2" font-weight="bold">  HTTP Requests</tspan></text>
+<text x="24" y="228" xml:space="preserve"><tspan fill="#8a93a6">  -------------</tspan></text>
+<text x="24" y="272" xml:space="preserve"><tspan fill="#8a93a6">09:14:02 203.0.113.9     GET    </tspan><tspan fill="#b8f068">200 OK</tspan><tspan fill="#8a93a6">                      18ms  /</tspan></text>
+<text x="24" y="294" xml:space="preserve"><tspan fill="#8a93a6">09:14:02 203.0.113.9     GET    </tspan><tspan fill="#b8f068">200 OK</tspan><tspan fill="#8a93a6">                       4ms  /assets/app.css</tspan></text>
+<text x="24" y="316" xml:space="preserve"><tspan fill="#8a93a6">09:14:03 203.0.113.9     POST   </tspan><tspan fill="#b8f068">201 Created</tspan><tspan fill="#8a93a6">                 31ms  /api/orders</tspan></text>
+<text x="24" y="338" xml:space="preserve"><tspan fill="#8a93a6">09:14:07 198.51.100.4    GET    </tspan><tspan fill="#7fd7e8">304 Not Modified</tspan><tspan fill="#8a93a6">             2ms  /assets/app.js</tspan></text>
+<text x="24" y="360" xml:space="preserve"><tspan fill="#8a93a6">09:14:11 203.0.113.9     GET    </tspan><tspan fill="#ffb86b">404 Not Found</tspan><tspan fill="#8a93a6">              890µs  /favicon.ico</tspan></text>
+<text x="24" y="382" xml:space="preserve"><tspan fill="#8a93a6">09:14:19 198.51.100.4    GET    </tspan><tspan fill="#b8f068">101 Switching Protocols</tspan><tspan fill="#8a93a6">      6ms  /cable</tspan></text>
+</svg>

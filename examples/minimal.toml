@@ -1,0 +1,6 @@
+# The minimum viable .mygrok.toml — just the two things that vary per project.
+# Token comes from MYGROK_AUTHTOKEN or ~/.mygrok/authtoken; the server comes
+# from whatever the binary was built with, MYGROK_SERVER, or
+# ~/.mygrok/config.toml.
+subdomain = "myapp"
+port      = 3000

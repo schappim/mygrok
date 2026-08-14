@@ -1,0 +1,14 @@
+$ curl -sSL https://tunnel.example.com/install | bash
+
+. >> downloading mygrok darwin/arm64 from https://tunnel.example.com/dl/mygrok-darwin-arm64
+. >> sudo install to /usr/local/bin/mygrok
+
+>   installed: /usr/local/bin/mygrok
+
+.   next:
+.     export MYGROK_AUTHTOKEN=<your-token>
+.     mygrok http 3000 --subdomain=foo
+
+$ mygrok version
+> mygrok v1.0.0
+. default server: tunnel.example.com:7000

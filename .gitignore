@@ -1,0 +1,32 @@
+# Build output
+/dist/
+/cmd/mygrokd/embed/clients/mygrok-*
+/mygrok
+/mygrokd
+
+# Real config and credentials. Unanchored on purpose — these must not be
+# committable from a subdirectory either. Only the .example and examples/
+# copies belong in the repo.
+.mygrok.toml
+.mygrok
+!.mygrok.example.toml
+authtoken
+*.env
+*.pem
+*.key
+
+# Server state. Harmless-looking filenames that hold live secrets:
+# passkeys.json has credential records, invites.json has valid invite tokens.
+iplist.json
+passkeys.json
+tunnellocks.json
+invites.json
+certs/
+
+# Docs assets are committed; scratch renders are not
+/docs/screenshots/*.tmp.*
+
+# OS / editor noise
+.DS_Store
+*.swp
+*.swo

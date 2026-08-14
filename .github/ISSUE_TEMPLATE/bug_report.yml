@@ -1,0 +1,65 @@
+name: Bug report
+description: Something doesn't work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please don't paste your auth token, an MCP connector URL, or the
+        contents of `/etc/mygrokd/mygrokd.env`. Replace them with `<token>`.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, what you got instead.
+      placeholder: |
+        $ mygrok http 3000 --subdomain=app
+        ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Client version
+      description: Output of `mygrok version`.
+      placeholder: mygrok v1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: server-version
+    attributes:
+      label: Server version
+      description: If you run the server, `mygrokd --version`. Skip if you're only a client.
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Client OS
+      options: [macOS, Linux, Other]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - Homebrew
+        - curl … /install from my server
+        - go install
+        - Built from source
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Client output, and `journalctl -u mygrokd -n 50 --no-pager` from the
+        server if it's a server-side problem.
+      render: shell

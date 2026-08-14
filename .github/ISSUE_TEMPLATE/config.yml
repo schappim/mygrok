@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/schappim/mygrok/security/advisories/new
+    about: Please report privately, not as a public issue. See SECURITY.md.
+  - name: Server setup and DNS
+    url: https://github.com/schappim/mygrok/blob/main/docs/server.md
+    about: Certificates, DNS records, and the wildcard-vs-specific gotcha are covered here.

@@ -1,0 +1,71 @@
+#cloud-config
+# mygrok tunnel server, installed at first boot.
+#
+# Paste into the "user data" box when creating the machine:
+#   DigitalOcean  → Advanced options → Add Initialization scripts
+#   AWS EC2       → Advanced details → User data
+#   Hetzner       → Cloud config
+#   Vultr/Linode  → Startup script (type: boot)
+#
+# Change DOMAIN and EMAIL below. Set TOKEN if you want a specific shared
+# token; leave it empty and one is generated for you.
+#
+# Afterwards, point DNS at the machine's IP:
+#   *.example.com       A   <ip>
+#   tunnel.example.com  A   <ip>
+#
+# Then check it took, and read your token:
+#   ssh root@<ip> 'systemctl status mygrokd'
+#   ssh root@<ip> 'grep MYGROK_AUTHTOKEN /etc/mygrokd/mygrokd.env'
+
+package_update: true
+packages:
+  - curl
+  - ca-certificates
+  - libcap2-bin
+
+write_files:
+  - path: /root/install-mygrok.sh
+    permissions: '0700'
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      DOMAIN="example.com"
+      EMAIL="you@example.com"
+      TOKEN=""                 # leave empty to generate one
+      DNS_PROVIDER="none"      # none | route53 | cloudflare | digitalocean
+
+      # Refuse the shipped placeholders: they pass the installer's own
+      # validation, so without this you get a server confidently configured
+      # for a domain you don't own.
+      if [ "$DOMAIN" = "example.com" ] || [ "$EMAIL" = "you@example.com" ]; then
+        echo "edit DOMAIN and EMAIL in the cloud-config before booting" >&2
+        exit 1
+      fi
+
+      ARGS=(--domain "$DOMAIN" --email "$EMAIL" --dns-provider "$DNS_PROVIDER")
+      [ -n "$TOKEN" ] && ARGS+=(--token "$TOKEN")
+
+      curl -fsSL https://raw.githubusercontent.com/schappim/mygrok/main/deploy/install-server.sh \
+        -o /root/install-server.sh
+      chmod +x /root/install-server.sh
+      /root/install-server.sh "${ARGS[@]}"
+
+runcmd:
+  # The install log is created 0600 BEFORE anything writes to it: the
+  # installer prints the generated auth token, and /var/log is world-readable
+  # on most distributions. cloud-init's own /var/log/cloud-init-output.log
+  # would capture it too, so we keep stdout out of there entirely.
+  - [ install, -m, '0600', /dev/null, /var/log/mygrok-install.log ]
+  - [ bash, -lc, "/root/install-mygrok.sh >>/var/log/mygrok-install.log 2>&1; echo \"mygrok install exit: $?\"" ]
+
+final_message: |
+  mygrokd installed. Add these DNS records, both pointing at this machine:
+    *.<your-domain>       A   <this-ip>
+    tunnel.<your-domain>  A   <this-ip>
+
+  Your auth token is in /etc/mygrokd/mygrokd.env (root-only).
+  Install details: /var/log/mygrok-install.log (root-only).
+  If the service isn't running, it's almost always DNS — fix the records,
+  then: systemctl restart mygrokd

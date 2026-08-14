@@ -1,0 +1,16 @@
+$ mygrok http 3000 --subdomain=jarvis
+
+>   mygrok tunnel active
+
+.   Forwarding   https://jarvis.example.com               -> 127.0.0.1:3000
+.                http://jarvis.example.com                -> 127.0.0.1:3000
+
+>   HTTP Requests
+.   -------------
+
+| 09:14:02 203.0.113.9     GET    200 OK                      18ms  /
+| 09:14:02 203.0.113.9     GET    200 OK                       4ms  /assets/app.css
+| 09:14:03 203.0.113.9     POST   201 Created                 31ms  /api/orders
+| 09:14:07 198.51.100.4    GET    304 Not Modified             2ms  /assets/app.js
+| 09:14:11 203.0.113.9     GET    404 Not Found              890µs  /favicon.ico
+| 09:14:19 198.51.100.4    GET    101 Switching Protocols      6ms  /cable

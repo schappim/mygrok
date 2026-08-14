@@ -1,0 +1,133 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (must already exist)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Resolve version
+        id: v
+        run: echo "version=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      # A release is the worst place to discover a broken build, and this
+      # workflow runs on a tag that CI may never have seen.
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then echo "$unformatted"; exit 1; fi
+
+      - name: Vet and test
+        run: |
+          go vet ./...
+          go test ./...
+
+      # Clients first: the server embeds them, so they have to exist before
+      # mygrokd is built or /dl and /install come back empty.
+      #
+      # No DefaultServer is stamped here on purpose. A release binary is
+      # generic — it must not point at anyone's server. Operators get a
+      # stamped build by running ./build.sh with MYGROK_HOST set, which is
+      # what their own mygrokd then serves from /dl.
+      - name: Build clients
+        env:
+          CGO_ENABLED: '0'
+          LDFLAGS: -s -w -X github.com/schappim/mygrok/internal/buildinfo.Version=${{ steps.v.outputs.version }}
+        run: |
+          mkdir -p dist cmd/mygrokd/embed/clients
+          for target in darwin-arm64 darwin-amd64 linux-amd64 linux-arm64; do
+            GOOS="${target%-*}" GOARCH="${target#*-}" \
+              go build -trimpath -ldflags "$LDFLAGS" -o "dist/mygrok-$target" ./cmd/mygrok
+            cp "dist/mygrok-$target" cmd/mygrokd/embed/clients/
+          done
+
+      - name: Build servers
+        env:
+          CGO_ENABLED: '0'
+          LDFLAGS: -s -w -X github.com/schappim/mygrok/internal/buildinfo.Version=${{ steps.v.outputs.version }}
+        run: |
+          for arch in amd64 arm64; do
+            GOOS=linux GOARCH="$arch" \
+              go build -trimpath -ldflags "$LDFLAGS" -o "dist/mygrokd-linux-$arch" ./cmd/mygrokd
+          done
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum mygrok-* mygrokd-* > SHA256SUMS
+
+      # The Homebrew formula builds from the source tarball GitHub generates
+      # for the tag, so publish its checksum too — that's the number that
+      # goes in the formula.
+      - name: Source tarball checksum
+        id: src
+        run: |
+          v="${{ steps.v.outputs.version }}"
+          curl -fsSL "https://github.com/${{ github.repository }}/archive/refs/tags/$v.tar.gz" -o src.tar.gz
+          echo "sha256=$(sha256sum src.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        # Pinned by SHA: this job has contents: write, and a mutable tag
+        # on a third-party action is a supply-chain hole.
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          tag_name: ${{ steps.v.outputs.version }}
+          generate_release_notes: true
+          files: |
+            dist/mygrok-*
+            dist/mygrokd-*
+            dist/SHA256SUMS
+          body: |
+            ## Install
+
+            **Client (macOS / Linux), via Homebrew:**
+
+            ```bash
+            brew install schappim/mygrok/mygrok
+            ```
+
+            **Client, from your own server:**
+
+            ```bash
+            curl -sSL https://tunnel.your-domain.com/install | bash
+            ```
+
+            **Server, on a fresh box:**
+
+            ```bash
+            curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/main/deploy/install-server.sh \
+              | sudo bash -s -- --domain example.com --email you@example.com
+            ```
+
+            Release binaries are generic — they carry no default server, so
+            set `MYGROK_SERVER` or `~/.mygrok/config.toml`. Clients downloaded
+            from your own `mygrokd` already know where to connect.
+
+            Verify downloads against `SHA256SUMS`.
+
+            <details>
+            <summary>Homebrew formula checksum for this tag</summary>
+
+            ```
+            sha256 "${{ steps.src.outputs.sha256 }}"
+            ```
+            </details>

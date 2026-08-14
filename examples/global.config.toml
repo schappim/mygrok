@@ -1,0 +1,21 @@
+# Global mygrok config — copy to ~/.mygrok/config.toml
+#
+# This is the lowest-priority lookup target (after walking up from cwd).
+# Best used to pin server + auth once, then let each project's
+# .mygrok.toml fill in subdomain + port.
+
+# Tunnel server (host:port). Required for Homebrew / `go install` builds;
+# clients downloaded from your own mygrokd already know their server.
+server = "tunnel.example.com:7000"
+
+# Shared auth token. Equivalent to writing it to ~/.mygrok/authtoken or
+# exporting MYGROK_AUTHTOKEN in your shell — pick whichever is least
+# annoying to manage. Whichever you choose, chmod 600 it.
+auth = "your-shared-token-here"
+
+# Defaults to 127.0.0.1; only set if you typically forward from a non-localhost.
+# host = "127.0.0.1"
+
+# `subdomain` and `port` are intentionally omitted here — they belong in
+# per-project .mygrok.toml files. Setting them globally would make every
+# `mygrok http` claim the same name.
