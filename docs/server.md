@@ -383,12 +383,63 @@ you left off. Delete them yourself when you actually mean it.
 | `public listen: listen tcp :80: bind: permission denied` | Running outside systemd without the capability | Run under the unit, or `sudo setcap cap_net_bind_service=+ep /usr/local/bin/mygrokd` |
 | `public host required: --public-host=example.com` | No `--public-host` and no `MYGROK_PUBLIC_HOST` | Pass one. Tunnel URLs are built from it. |
 | Certificates never issue | Port 80/443 blocked upstream | Check the cloud firewall / security group, not just the box |
+| HTTPS worked, then stopped weeks later | Renewal has been failing quietly | See [When renewal stops](#when-renewal-stops-quietly) below |
 | Certificates never issue, ports open | DNS not pointing here yet | `dig +short tunnel.example.com` should be this server's IP |
 | `cert domain "*.example.com" is a wildcard, which requires DNS-01` | Wildcard in `--cert-domains` with `--dns-provider=none` | Set a DNS provider, or drop the wildcard and let on-demand handle it |
 | Tunnel registers but gets no traffic | A specific A record beats the wildcard | `dig +short <sub>.example.com` — if it isn't your server, that name is taken |
 | `subdomain in use` | Another client holds it | Pick another name, or stop the other client |
 | Client can't connect at all | Port 7000 blocked | It's a separate port from 80/443; open it explicitly |
 | `--lan needs --dns-provider` | LAN-direct publishes DNS records | Configure a provider, or drop `--lan` |
+
+### When renewal stops quietly
+
+This is the failure mode that bites hardest, because nothing looks wrong
+until the certificate actually expires — typically about 30 days after
+renewal first started failing, by which point the logs have rotated.
+
+Symptoms: HTTPS hangs or reports an expired certificate, while `:80` still
+serves fine and the service is `active`.
+
+```bash
+# What's actually being served, and when does it expire?
+echo | openssl s_client -connect tunnel.example.com:443 \
+  -servername tunnel.example.com 2>/dev/null | openssl x509 -noout -dates
+
+# Why did renewal fail? Look well before the expiry date.
+journalctl -u mygrokd --since '6 weeks ago' \
+  | grep -iE 'cert|acme|renew|error' | tail -50
+```
+
+With a DNS provider, the usual cause is credentials: a rotated or deleted
+API token means DNS-01 can't complete, and a wildcard has no fallback.
+Confirm they still work, fix them in `/etc/mygrokd/mygrokd.env`, and
+restart.
+
+If it doesn't self-heal, force a fresh issuance:
+
+```bash
+sudo systemctl stop mygrokd
+sudo mv /var/lib/mygrokd/certs /var/lib/mygrokd/certs.bak-$(date +%F)
+sudo systemctl start mygrokd
+journalctl -u mygrokd -f          # watch for "certs ready"
+```
+
+Keep the backup until the new certificate is confirmed, and don't loop on
+this — Let's Encrypt allows 5 duplicate certificates per week.
+
+**Worth setting up before you need it.** mygrokd is happy to run for weeks
+with a dead certificate. A weekly cron is enough:
+
+```bash
+echo | openssl s_client -connect tunnel.example.com:443 \
+  -servername tunnel.example.com 2>/dev/null \
+  | openssl x509 -noout -checkend 1209600 \
+  || echo "mygrok certificate expires within 14 days"
+```
+
+---
+
+## Logs
 
 Logs first, always:
 
